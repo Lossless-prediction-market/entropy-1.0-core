@@ -1,618 +1,318 @@
-# LossLess Labs Research Consolidation Strategy
+# LossLess Labs — Consolidation Strategy (Updated May 2026)
 
-## Part 1: Master File Inventory - What We Have
-
-### Files We've Already Created (to move into consolidated repo)
-
-**Documentation Files (6 files):**
-```
-entropy-docs/
-├── README.md — Protocol overview & quick start
-├── INDEX.md — Full table of contents
-├── entropyfi-1.0/
-│   ├── prediction-market.md — Complete game mechanics
-│   └── sponsorship.md — Pool sponsorship guide
-├── entropyfi-50-50/
-│   └── overview.md — Soft hedge/leverage products
-└── developers/
-    └── deployed-contracts.md — Contract addresses (3 networks)
-```
-
-**Blog Archive Files (3 files):**
-```
-entropy-blog/
-├── COMPLETE_MEDIUM_ARCHIVE.md — All 16 Medium articles (950 lines)
-├── BLOG_INDEX.md — Navigation & theme analysis
-└── MEDIUM_BLOG_ARCHIVE.md — Initial 8-article summary
-```
-
-**Research & Reference Files (3 files):**
-```
-├── ENTROPYFI_RESEARCH_AGGREGATE.md — Initial findings & timeline
-├── DOCS_REPO_GUIDE.md — How to set up documentation
-└── COMPLETE_PACKAGE_SUMMARY.md — Package overview
-```
-
-**Key Arc Context (1 file):**
-```
-├── morpho-arc-interview.txt — Morpho + Arc confirmation
-```
-
-**Total: 13 Files Already Created**
+> **Status Key:** ✅ Done | 🔄 In Progress | ⬜ Pending
 
 ---
 
-### What We Need to Extract From the 14 Forked Repos
+## WHAT HAS CHANGED SINCE V1
 
-You have these 14 repos forked to LossLess-Labs:
-1. **entropy-1.0-core** ← PRIMARY (Smart contracts)
-2. **entropy-open-governance** ← SECONDARY (Token/governance)
-3. **entropy-whitelist-and-airdrop** ← REFERENCE (distribution data)
-4. **entropy-contract-list** ← CRITICAL (all deployed contract addresses)
-5. governance (Compound fork)
-6. compound-protocol (reference)
-7. uniswap-interface (reference UI)
-8. olympus-frontend (reference UI)
-9. lobis-frontend ← PRIMARY (main UI code)
-10. entropy-resource (design assets)
-11. entropyfi-color-card (design)
-12. Maskbook (integration reference)
-13. InitialTwitterOffering (token distribution reference)
-14. Open-Grants-Program (reference)
+### Yield Layer Decision: Morpho (Primary) + Aave (Fallback)
+The original Entropyfi used **Aave only**. We are replacing this with **Morpho as the primary yield layer** on Arc.
 
----
+**Why Morpho over Aave on Arc:**
+- Both Aave and Morpho are confirmed Arc launch partners (Oct 2025 testnet launch)
+- Morpho's modular isolated-market design (Morpho Blue) is better suited for per-pool yield isolation — which maps perfectly to Entropyfi's per-prediction-pool architecture
+- Morpho Blue is only 650 lines of immutable code — significantly lower attack surface
+- Morpho Vaults allow curator-managed risk isolation (each prediction pool = its own Morpho market)
+- Morpho has $13B+ TVL, Coinbase ($1.6B loans), Apollo, Gemini, and Anchorage integrations — enterprise-grade proven
+- Morpho V2 (2026) adds fixed-rate and fixed-duration loans — matching prediction market settlement cycles perfectly
+- **If Aave deploys to Arc**, use Aave as a secondary yield source or fallback for pools where Morpho vaults are not yet live
 
-## Part 2: What to Extract From Each Repo
-
-### HIGH PRIORITY - Extract Everything
-
-**entropy-1.0-core**
-```
-Copy to consolidated repo:
-├── contracts/ (ALL .sol files)
-├── test/ (test files for reference)
-├── README.md (original)
-├── package.json (dependencies)
-├── .env.example (config template)
-└── Notes: This is the core protocol. We need EVERY contract.
-```
-
-**entropy-open-governance**
-```
-Copy:
-├── contracts/ (token contracts)
-├── test/
-├── README.md
-├── tokenomics/ (if exists)
-└── Notes: Token design, vesting schedules, governance structure
-```
-
-**entropy-contract-list**
-```
-Copy EVERYTHING - this has:
-├── mainnet.json (Polygon mainnet contract addresses)
-├── mumbai.json (testnet)
-├── kovan.json (testnet)
-└── All deployed contract addresses (CRITICAL for understanding deployments)
-```
-
-**lobis-frontend**
-```
-Copy:
-├── src/ (React code - UI patterns)
-├── components/ (reusable components)
-├── pages/ (game creation, prediction pages)
-├── hooks/ (blockchain interaction patterns)
-├── README.md
-└── Notes: UI/UX patterns for prediction market interface
-```
-
-### MEDIUM PRIORITY - Extract Key Files
-
-**entropy-resource**
-```
-Copy:
-├── All design assets
-├── Colors, typography, spacing
-└── Notes: Design system reference for Arc version
-```
-
-**governance (Compound fork)**
-```
-Copy:
-├── contracts/ (governance patterns)
-├── Notes: How they structured governance - may inspire Arc version
-```
-
-**compound-protocol**
-```
-Copy:
-├── contracts/ (lending pattern reference)
-├── Notes: Understanding yield protocol integration patterns
-```
-
-### LOW PRIORITY - Reference Only
-
-- uniswap-interface (UI pattern reference)
-- olympus-frontend (UI pattern reference)
-- Maskbook (integration reference)
-- InitialTwitterOffering (distribution reference)
-- Open-Grants-Program (reference)
-- entropyfi-color-card (design reference)
+### Arc Blockchain: Key Facts for This Build
+- **EVM-compatible** — All existing Solidity contracts can be redeployed as-is
+- **USDC as native gas** — No volatile gas token; fees are predictable dollar-denominated amounts
+- **Sub-second finality** (Malachite BFT consensus) — Settlement triggers are instant and deterministic
+- **Chainlink confirmed on Arc** — Oracle strategy unchanged; Chainlink is an official Arc infrastructure partner
+- **Arc public testnet live** since Oct 28, 2025; mainnet planned summer 2026
+- **Arc native token (ARC)** — Raised $222M presale (May 2026), a16z/BlackRock/Goldman backed. Staking ARC gives fee discounts — relevant for protocol economics
+- **StableFX built-in** — Enables USDC/EURC pools natively with institutional-grade FX settlement
+- **Opt-in privacy** — Configurable for institutional compliance needs
 
 ---
 
-## Part 3: Consolidated Repo Structure (NEW)
+## PART 1: FILE INVENTORY
 
-Create one master repo: `LossLess-Labs/lossless-core`
+### Already In entropy-1.0-core Repo ✅
+
+**Smart Contracts (from merged repos):**
+```
+core/                    ✅ Core prediction market contracts (.sol)
+governance/              ✅ Governor, Timelock, SafeMath, Entropy.sol
+interfaces/              ✅ IPartnerGameToken.sol
+mining/                  ✅ Farm contracts, Reactor contracts
+vesting/                 ✅ InvestorVester, LPVester, TreasuryVester
+src/                     ✅ lobis-frontend React code
+public/                  ✅ Frontend static assets
+```
+
+**Documentation Files:**
+```
+README.md                ✅ Protocol overview
+index.md                 ✅ Full table of contents
+overview.md              ✅ 50,50 products overview
+prediction-market.md     ✅ Game mechanics guide
+sponsorship.md           ✅ Sponsorship guide
+deployed-contracts.md    ✅ All contract addresses (3 networks)
+DOCS_REPO_GUIDE.md       ✅ Repo setup guide
+```
+
+**Research & Archive:**
+```
+COMPLETE_MEDIUM_ARCHIVE.md      ✅ All 16 Medium articles
+MEDIUM_BLOG_ARCHIVE.md          ✅ 8-article summary
+ENTROPYFI_RESEARCH_AGGREGATE.md ✅ Research findings & timeline
+CONSOLIDATION_STRATEGY.md       ✅ This file
+COMPLETE_PACKAGE_SUMMARY.md     ✅ Package overview
+```
+
+**Whitelist/Distribution Data:**
+```
+ITO-Tier1-Whitelist.txt              ✅
+ITO-Tier2-Whitelist.txt              ✅
+Airdrop-DeBank.txt                   ✅
+Airdrop-Round-1.txt                  ✅
+Airdrop-Zapper.txt                   ✅
+Partnership-BOND-Whitelist.txt       ✅
+Partnership-GHST-Whitelist.txt       ✅
+Partnership-GHST-Whitelist-Tier2.txt ✅
+```
+
+---
+
+### Still To Be Added To Repo ⬜
+
+**From entropy-contract-list repo** (CRITICAL):
+```
+mainnet.json     — All Polygon mainnet deployed addresses
+mumbai.json      — Polygon Mumbai testnet addresses
+kovan.json       — Kovan testnet addresses
+```
+> These are the ground-truth deployed contract addresses. The `deployed-contracts.md` we restored is a human-readable version, but the JSON files are the machine-readable source.
+
+**From entropy-open-governance repo** (already partially merged via governance/ folder — verify completeness):
+```
+governance/Entropy.sol              ✅ (check if complete)
+governance/GovernorBravoDelegate.sol ✅
+governance/Timelock.sol             ✅
+mining/ contracts                   ✅
+vesting/ contracts                  ✅
+```
+
+**Missing Docs (to create or find):**
+```
+entropyfi-50-50/cope-free-hedge.md      ⬜ (needs writing)
+entropyfi-50-50/rekt-free-leverage.md   ⬜ (needs writing)
+entropyfi-50-50/vsq-tutorial.md         ⬜ (needs writing)
+token/erp-market.md                     ⬜ (needs writing)
+token/tokenomics.md                     ⬜ (needs writing)
+token/vault-inc-staking.md              ⬜ (needs writing)
+developers/game-logic.md                ⬜ (needs writing)
+developers/pool-tokens.md               ⬜ (needs writing)
+developers/token-nav.md                 ⬜ (needs writing)
+getting-started/testnet-tokens.md       ⬜ (needs writing)
+community/join.md                       ⬜ (needs writing)
+```
+
+**To Generate (AI-assisted):**
+```
+IMPROVEMENTS.md             ⬜ AI will write from codebase analysis
+ARC_STRATEGY.md             ⬜ AI will write after Arc docs review
+ARC_TESTNET_DEPLOYMENT.md   ⬜ AI will write with deployment checklist
+MORPHO_INTEGRATION.md       ⬜ AI will write Morpho-specific integration guide
+```
+
+---
+
+## PART 2: SMART CONTRACTS — DO YOU NEED ALL .SOL FILES?
+
+### Short Answer: You Have Them. Now Understand Them.
+
+All `.sol` files are already in the repo under `core/`, `governance/`, `mining/`, `vesting/`, and `interfaces/`. **You do NOT need to manually read every deployed contract address on Polygonscan.** Here is why:
+
+The file `deployed-contracts.md` in the repo contains every contract address already organized by:
+- Network (Polygon Mainnet / Mumbai Testnet / Kovan Testnet)
+- Contract type (Factory, Prediction Pools, Farm Contracts, Pool Tokens, Sponsor Tokens)
+
+**What the addresses are useful for:**
+1. Understanding what contracts to expect to deploy when you build your version
+2. Verifying logic by checking Polygonscan source code
+3. Understanding the pool naming convention (lgBTC-USDT, stBTC-USDT, spBTC-USDT)
+
+**You do NOT need to:**
+- Manually copy ABIs from Polygonscan
+- Interact with live contracts on Polygon
+- Track current balances or TVL of old contracts
+
+**The key contracts to deeply understand from the repo:**
+
+| File | Why It Matters |
+|---|---|
+| `core/*.sol` | Pool creation, deposit, settlement, yield distribution |
+| `governance/Entropy.sol` | The governance/utility token design |
+| `governance/GovernorBravoDelegate.sol` | On-chain governance voting mechanics |
+| `governance/Timelock.sol` | Governance execution delay |
+| `mining/EntropyLiquidityFarm.sol` | LP reward distribution pattern |
+| `mining/EntropySponsorFarm.sol` | Sponsor reward distribution |
+| `vesting/InvestorVester.sol` | Token vesting schedule |
+| `interfaces/IPartnerGameToken.sol` | Interface for rebase token integration |
+
+---
+
+## PART 3: WHAT ELSE SHOULD GO INTO THE REPO FROM THE 14 REPOS
+
+### Repos Already Merged ✅
+- entropy-1.0-core (core contracts)
+- entropy-open-governance (governance + mining + vesting)
+- entropy-whitelist-and-airdrop (distribution data)
+- lobis-frontend (UI code under src/)
+- entropyfi-docs (documentation)
+
+### Repos NOT Yet Merged — Recommendations
+
+**entropy-contract-list** → HIGH PRIORITY ⬜
+Extract the JSON files with all deployed contract addresses. These are the machine-readable source of truth. Even for historical reference, they are critical for understanding what a full deployment looks like.
+
+**entropy-resource / entropyfi-color-card** → MEDIUM PRIORITY ⬜
+Design tokens, color palette (the distinctive Entropyfi yellow-green), typography, and component styles. Useful when building the Arc frontend. Extract and store under `design-system/`.
+
+**governance (Compound fork)** → LOW PRIORITY
+Already have governance contracts from entropy-open-governance. Skip unless you notice something missing.
+
+**compound-protocol / uniswap-interface / olympus-frontend** → SKIP
+These are upstream forks of major protocols. Your repo already has what was adapted from them. Do not merge — they would bloat the repo with irrelevant code.
+
+**Maskbook / InitialTwitterOffering / Open-Grants-Program** → SKIP
+Reference only. No code in these is relevant to your Arc build.
+
+---
+
+## PART 4: CONSOLIDATED REPO TARGET STRUCTURE
+
+The `entropy-1.0-core` repo should eventually look like this:
 
 ```
-lossless-core/
+entropy-1.0-core/
 │
-├── README.md (overview of entire project)
-├── ARCHITECTURE.md (design decisions)
-├── IMPROVEMENTS.md (AI will generate this)
-├── ARC_STRATEGY.md (AI will generate this)
-├── ARC_TESTNET_DEPLOYMENT.md (AI will generate this)
+├── README.md                          ✅ (exists)
+├── IMPROVEMENTS.md                    ⬜ (AI to generate)
+├── ARC_STRATEGY.md                    ⬜ (AI to generate)
+├── ARC_TESTNET_DEPLOYMENT.md          ⬜ (AI to generate)
+├── MORPHO_INTEGRATION.md              ⬜ (AI to generate)
+├── CONSOLIDATION_STRATEGY.md         ✅ (this file)
 │
-├── research/
-│   ├── ENTROPYFI_COMPLETE_RESEARCH.md (all Entropyfi docs)
-│   ├── MEDIUM_BLOG_ARCHIVE.md (all 16 articles)
-│   ├── SMART_CONTRACT_REFERENCE.md (all contract addresses)
-│   └── MORPHO_ARC_CONTEXT.md (Morpho + Arc partnership info)
+├── core/                              ✅ Core prediction market .sol files
+├── governance/                        ✅ Token + governance .sol files
+├── interfaces/                        ✅ Interface definitions
+├── mining/                            ✅ Farm reward contracts
+├── vesting/                           ✅ Vesting contracts
 │
-├── entropyfi-reference/
-│   ├── original-docs/ (all docs we recovered)
-│   │   ├── protocol-overview/
-│   │   ├── 1-0-prediction-markets/
-│   │   ├── 50-50-products/
-│   │   ├── token-economics/
-│   │   └── developer-guide/
-│   │
-│   ├── original-code/ (from entropy-1.0-core & others)
-│   │   ├── contracts/ (ALL .sol files)
-│   │   ├── test/
-│   │   ├── frontend/ (from lobis-frontend)
-│   │   ├── tokenomics/ (from governance)
-│   │   └── governance/ (from open-governance)
-│   │
-│   └── deployments/
-│       ├── polygon-mainnet-addresses.json
-│       ├── polygon-mumbai-addresses.json
-│       └── kovan-addresses.json
+├── src/                               ✅ lobis-frontend React source
+├── public/                            ✅ Frontend static assets
 │
-├── arc-implementation/ (NEW - your version)
-│   ├── smart-contracts/
-│   │   ├── core/ (adapted from Entropyfi)
-│   │   ├── yield/ (Morpho integration)
-│   │   ├── oracle/ (Arc oracle choice)
-│   │   ├── governance/ (Arc token design)
-│   │   └── tests/
-│   │
-│   ├── frontend/
-│   │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── hooks/
-│   │
-│   └── testnet-deployment/
-│       ├── deployment-scripts/
-│       ├── testnet-config/
-│       └── deployment-checklist.md
+├── deployments/                       ⬜ (to add from entropy-contract-list)
+│   ├── polygon-mainnet.json
+│   ├── polygon-mumbai.json
+│   └── kovan.json
 │
-├── design-system/
+├── design-system/                     ⬜ (to add from entropy-resource)
 │   ├── colors.json
 │   ├── typography.json
-│   ├── components/
-│   └── design-tokens.json
+│   └── components/
 │
-└── docs/
-    ├── protocol-design/
-    ├── smart-contract-guide/
-    ├── deployment-guide/
-    └── user-guide/
+├── docs/                              ⬜ (reorganize existing .md files here)
+│   ├── prediction-market.md           ✅ (currently at root)
+│   ├── sponsorship.md                 ✅ (currently at root)
+│   ├── overview.md                    ✅ (currently at root)
+│   ├── deployed-contracts.md          ✅ (currently at root)
+│   └── [missing docs to write]
+│
+└── research/                          ⬜ (move archive files here)
+    ├── COMPLETE_MEDIUM_ARCHIVE.md     ✅ (currently at root)
+    ├── MEDIUM_BLOG_ARCHIVE.md         ✅ (currently at root)
+    ├── ENTROPYFI_RESEARCH_AGGREGATE.md ✅ (currently at root)
+    └── COMPLETE_PACKAGE_SUMMARY.md    ✅ (currently at root)
 ```
 
 ---
 
-## Part 4: Smart Contract Files - Do You Need All .sol Files?
+## PART 5: YIELD LAYER — MORPHO VS AAVE DECISION MATRIX
 
-### SHORT ANSWER: YES, but with caveats
+| Factor | Entropyfi (Aave) | LossLess v2 (Morpho Primary) | Notes |
+|---|---|---|---|
+| Arc launch partner | Aave ✅ | Morpho ✅ | Both confirmed |
+| Isolation per pool | Shared pool ❌ | Isolated market per pool ✅ | Morpho Blue |
+| Code size/audit surface | Large | 650 lines immutable ✅ | Morpho Blue |
+| Fixed-rate support | No | Yes (V2 2026) ✅ | Matches settlement cycles |
+| Institutional usage | High | Higher (Coinbase, Apollo) ✅ | Morpho 2026 |
+| Curator/vault control | No | Yes (MetaMorpho Vaults) ✅ | Per-pool risk management |
+| Fallback if needed | — | Aave as secondary ✅ | Use both if live on Arc |
 
-**What you MUST have:**
-```solidity
-// Core Pool Logic (MUST HAVE)
-- PredictionMarket.sol (or MarketFactory.sol) — pool creation & settlement
-- PoolToken.sol (or LongShortToken.sol) — long/short token mechanics
-- SettlementLogic.sol — winner calculation & yield distribution
-- NavCalculation.sol — token NAV updates
-
-// Yield Integration (MUST HAVE)
-- YieldAdapter.sol (or AaveIntegration.sol) — connects to Morpho
-- InterestDistribution.sol — how yield flows to winners
-
-// Token (MUST HAVE)
-- ERP.sol (or governance token) — $ERP equivalent
-- Vesting.sol — token vesting schedule
-
-// Oracle Integration (MUST HAVE)
-- OracleIntegration.sol (Chainlink in original, you'll change to Arc oracle)
-- PriceFeed.sol — gets settlement prices
-```
-
-**What you should understand but can reference:**
-```solidity
-// Utility (can reference, not copy 1:1)
-- SafeMath.sol — standard libraries
-- Ownable.sol — access control (might use OpenZeppelin instead)
-- ReentrancyGuard.sol — security (might use Arc's patterns)
-
-// Governance (reference for Arc version)
-- GovernanceToken.sol
-- Governor.sol
-- Voting.sol
-```
-
-**What to skip:**
-- Any fork of Uniswap/Compound/OpenZeppelin (use latest OpenZeppelin or Arc equivalents)
-- Test files (read for logic understanding, rewrite for Arc testnet)
-
-### DO YOU NEED TO MANUALLY READ ALL CONTRACT ADDRESSES?
-
-**ANSWER: Not manually. But systematically.**
-
-The file `deployed-contracts.md` we created has ALL contract addresses organized by network:
-
-```markdown
-# From our DOCS file:
-
-Polygon Mainnet:
-- Factory: 0xeff87121ab94457789495918eef5a5904eb04419
-- BTC-USDT Pool: 0x637958F16fd1c79695206a9af8bEe7c0aC242B6E
-- [30+ more pools listed]
-
-All Sponsor Farm addresses
-All LP Farm addresses
-All Game Token addresses
-All Principal Token addresses
-```
-
-**You should:**
-1. ✅ Keep this list (it's in our docs)
-2. ✅ Use it as reference for what contracts to expect
-3. ❌ Don't manually look them up — we already did
-4. ✅ When you deploy on Arc, create same structure with new addresses
+**Decision: Morpho Blue as primary yield layer. Aave as optional secondary if it deploys to Arc.**
 
 ---
 
-## Part 5: AI Prompt for Single-Repo Analysis
+## PART 6: ORACLE STRATEGY
 
-Once you consolidate everything into one `lossless-core` repo, use this prompt:
+**Chainlink is confirmed as an Arc infrastructure partner.** No change from Entropyfi's original oracle choice.
 
-```markdown
-# MASTER PROMPT FOR LOSSLESS LABS CODEBASE ANALYSIS
+However, consider a dual-oracle approach:
+- **Chainlink** — Primary (price feeds, settlement)
+- **Pyth Network** — Secondary/fallback (faster updates, lower cost, already EVM-compatible)
 
-## Context
-You are analyzing the complete Entropyfi protocol codebase and documentation to inform the design of LossLess Labs v2.0 - a lossless prediction market protocol deploying on Arc (Circle's stablecoin-native L1).
-
-## Files to Read (in order)
-1. research/ENTROPYFI_COMPLETE_RESEARCH.md (overview)
-2. research/MEDIUM_BLOG_ARCHIVE.md (product evolution story)
-3. entropyfi-reference/original-docs/ (all documentation files)
-4. entropyfi-reference/original-code/contracts/ (smart contract code)
-5. entropyfi-reference/deployments/ (what was deployed where)
-
-## Task 1: Write IMPROVEMENTS.md
-Analyze Entropyfi's design and identify what LossLess Labs should:
-- **Keep identical** (proven mechanics)
-- **Keep but optimize** (known improvements)
-- **Replace entirely** (2026 standards vs 2021)
-- **Add new** (Arc enables this)
-
-Structure:
-```markdown
-# LossLess Labs Improvements Over Entropyfi
-
-## 1. Kept Identical (Proven)
-- Lossless mechanic (yield as rewards)
-- Multi-collateral support
-- Pool token design
-- Auto-compounding
-
-## 2. Optimized
-- [mechanism]: was X, now will be Y because Z
-
-## 3. Replaced
-- [mechanism]: was X (why it failed), now Y (Arc advantage)
-
-## 4. New Features (Arc-enabled)
-- [feature]: Arc enables this by [technical reason]
-```
-
-## Task 2: Write ARC_STRATEGY.md
-Decisions specific to Arc deployment:
-
-```markdown
-# Arc Deployment Strategy
-
-## 1. Yield Layer
-- Morpho vs Aave on Arc vs both?
-- Rationale for choice
-- Integration points
-- Risk management
-
-## 2. Oracle Strategy
-- Which oracle for Arc?
-- Fallback options
-- Price feed requirements
-- Settlement mechanism
-
-## 3. Token Economics
-- $ERP replacement token?
-- Vesting schedule
-- Governance rights
-- Farming incentives
-
-## 4. Multi-Currency Support
-- USDC pools
-- EURC pools
-- Settlement currency options
-- FX handling
-
-## 5. Institutional Features
-- Compliance layer
-- KYC/AML integration
-- Real-world asset support
-- Enterprise partnerships
-```
-
-## Task 3: Write ARC_TESTNET_DEPLOYMENT.md
-Step-by-step Arc testnet deployment:
-
-```markdown
-# Arc Testnet Deployment Plan
-
-## Phase 1: Testnet Setup
-- [ ] Set up Arc testnet wallet
-- [ ] Get Arc testnet USDC
-- [ ] Deploy contracts in order:
-  - [ ] Token contract
-  - [ ] Factory contract
-  - [ ] Pool contract
-  - [ ] Oracle integration
-  - [ ] Yield adapter
-
-## Phase 2: Integration Testing
-- [ ] Test pool creation
-- [ ] Test user deposit
-- [ ] Test yield generation
-- [ ] Test settlement
-- [ ] Test winner calculation
-
-## Phase 3: Edge Cases
-- [ ] Multi-collateral pools
-- [ ] Settlement edge cases
-- [ ] Slippage scenarios
-- [ ] Emergency pause
-
-## Phase 4: Gas Optimization
-- [ ] Measure stablecoin gas costs
-- [ ] Optimize for Arc's finality
-- [ ] Profile yield distribution
-
-## Deployment Checklist (generated from Arc docs at https://docs.arc.io/)
-- [Auto-generate from Arc documentation]
-```
-
-## Output Files
-1. IMPROVEMENTS.md (2000-3000 words)
-2. ARC_STRATEGY.md (2000-3000 words)
-3. ARC_TESTNET_DEPLOYMENT.md (1500-2000 words with checklist)
-
-## Success Criteria
-- Technical depth showing understanding of smart contracts
-- Clear rationale for every decision
-- Specific Arc advantages identified
-- Actionable deployment steps
-- Ready for developer implementation
-```
+Arc's sub-second finality means oracle speed matters more than on Polygon. Pyth's sub-second price updates align better with Arc's finality model than Chainlink's ~15-second heartbeats on some feeds.
 
 ---
 
-## Part 6: Additional Preparation Recommendations
+## PART 7: AI PROMPT — FOR GENERATING IMPROVEMENTS.MD, ARC_STRATEGY.MD, ARC_TESTNET_DEPLOYMENT.MD
 
-### Before Writing the Above Files:
+See companion file: **`MASTER_AI_PROMPT.md`** in this repo.
 
-**1. Read Arc Documentation (1-2 hours)**
-- https://docs.arc.io/
-- Focus on: stablecoin gas, finality, compliance, FX
-- Note: How do you pay for transactions? What are gas primitives?
-
-**2. Morpho on Arc Research**
-- Does Morpho have official Arc docs?
-- What's the integration pattern?
-- What yields does Morpho guarantee?
-
-**3. Arc Oracle/PriceFeed Strategy**
-- What's the default oracle on Arc?
-- Does Arc have its own oracle?
-- Can you use Pyth instead of Chainlink?
-- What's faster/cheaper on Arc?
-
-**4. Create Decision Matrix**
-Before AI writes, create a grid:
-
-| Decision | Entropyfi | Option A | Option B | Arc Winner |
-|---|---|---|---|---|
-| Yield | Aave only | Morpho only | Morpho + Aave | ? |
-| Oracle | Chainlink | Pyth | Arc native | ? |
-| Gas | MATIC | USDC | EURC | USDC primary? |
-| Settlement | 2 min | <1 sec | Instant | <1 sec Arc |
-
-**5. Deployment Order (Prepare)**
-Smart contracts should be deployed in this order:
-1. Token (need for testing)
-2. Factory (creates pools)
-3. Pool template (copied by factory)
-4. YieldAdapter (Morpho integration)
-5. OracleAdapter (Arc oracle)
-6. Governance (if needed)
+That file contains the complete prompt to paste into Claude (or any LLM) once the repo is fully consolidated. The AI will read the codebase and generate all three output documents.
 
 ---
 
-## Part 7: Smart Contract Deep Dive - What to Study
+## PART 8: ACTION CHECKLIST (UPDATED)
 
-### Core Files to Deeply Understand:
+### Consolidation (This Week)
+- ✅ Merge entropy-1.0-core contracts
+- ✅ Merge entropy-open-governance contracts
+- ✅ Merge entropy-whitelist-and-airdrop data
+- ✅ Merge lobis-frontend UI code
+- ✅ Add documentation files (prediction-market, sponsorship, overview, deployed-contracts)
+- ✅ Add research archive (Medium articles, research aggregate)
+- ✅ Remove duplicate files (COMPLETE_MEDIUM_ARCHIVE (1).md)
+- ⬜ Add entropy-contract-list JSON files (deployments/)
+- ⬜ Add design system files from entropy-resource
 
-**From entropy-1.0-core:**
-1. **Factory.sol** — How pools are created
-   - Read for: Pool initialization, parameter settings, event emissions
+### Arc Research (This Week)
+- ⬜ Read Arc developer docs at https://docs.arc.network
+- ⬜ Get Arc testnet wallet + USDC from faucet
+- ⬜ Confirm Morpho is live/planned on Arc testnet
+- ⬜ Check Chainlink feed availability on Arc testnet
+- ⬜ Note Arc's RPC endpoint, chain ID, explorer URL
 
-2. **Market.sol or PredictionMarket.sol** — Game logic
-   - Read for: Deposit flow, settlement logic, winner calculation
-   - Key function: `settlementLogic()` — this is where you customize for Arc
+### AI Document Generation (Next Week)
+- ⬜ Run MASTER_AI_PROMPT.md against this repo
+- ⬜ Generate IMPROVEMENTS.md
+- ⬜ Generate ARC_STRATEGY.md
+- ⬜ Generate ARC_TESTNET_DEPLOYMENT.md
+- ⬜ Generate MORPHO_INTEGRATION.md
 
-3. **PoolToken.sol** — How long/short/sponsor tokens work
-   - Read for: Token minting, burning, NAV updates
-   - Key: How do token values change after settlement?
-
-4. **Settlement.sol** — Winner payout
-   - Read for: How yield is distributed
-   - Critical: Proportional allocation math
-
-5. **Integration with Aave** — How deposits go to yield
-   - Read for: Flow of funds from pool → Aave → back to pool
-   - You'll replace this with Morpho on Arc
-
-### Questions to Answer While Reading:
-
-1. **Pool Lifecycle:**
-   - How is a pool created?
-   - How do users join?
-   - How does settlement trigger?
-   - How are winners calculated?
-   - How is yield distributed?
-
-2. **Token Mechanics:**
-   - How are long/short tokens minted?
-   - What represents a user's claim?
-   - How do NAV changes work?
-   - When do tokens burn?
-
-3. **Yield Flow:**
-   - Where do deposits go first?
-   - When do they go to Aave?
-   - When do they return?
-   - How is interest tracked?
-
-4. **Settlement:**
-   - What triggers settlement?
-   - What determines winners?
-   - How is yield split among winners?
-   - What happens if oracle fails?
+### Implementation Prep (Week 3-4)
+- ⬜ Adapt core contracts for Morpho yield layer
+- ⬜ Replace Chainlink Keepers with Arc-compatible automation
+- ⬜ Set up Arc testnet project (Hardhat/Foundry)
+- ⬜ Deploy token contract to Arc testnet
+- ⬜ Deploy factory contract to Arc testnet
+- ⬜ Deploy first prediction pool to Arc testnet
+- ⬜ Test full round lifecycle on Arc testnet
 
 ---
 
-## Part 8: Do You Need All .sol Files? DETAILED ANSWER
+## SUMMARY
 
-### What You MUST Copy/Understand:
+**The yield layer is Morpho.** Not because Aave is bad, but because Morpho's isolated-market architecture maps directly to per-pool lossless prediction markets. Each prediction pool gets its own Morpho Blue market. Risk is isolated. Yield is clean. The modular design mirrors what Entropyfi was trying to do.
 
-**Pool Management:**
-- Factory contract (creates pools)
-- Pool/Market contract (game logic)
-- All pool state management
+**Arc is the right chain.** USDC gas eliminates the Polygon MATIC problem. Sub-second finality makes settlement instant. Chainlink is already there. Morpho is already there. Aave is already there. The infrastructure stack is proven — you are building application logic on top of it, not reinventing rails.
 
-**Token Economics:**
-- Pool token contracts (long/short/sponsor)
-- NAV calculation logic
-- Token minting/burning
-
-**Yield Integration:**
-- Aave adapter (you'll adapt for Morpho)
-- Interest accumulation logic
-- Yield distribution
-
-**Settlement:**
-- Oracle integration
-- Winner calculation
-- Payout logic
-
-### What You Can Reference But Rewrite for Arc:
-
-**Access Control:**
-- Original: Openzeppelin v4
-- Arc version: Use Arc-standard patterns (might be different)
-
-**Math Libraries:**
-- Original: SafeMath.sol
-- Arc version: Solidity 0.8+ has built-in overflow protection
-
-**Governance:**
-- Original: Custom governance
-- Arc version: Use Arc's compliance-ready governance
-
-### What You Can Skip:
-
-- Test files (but study the test logic)
-- Fork code (Uniswap, Compound, etc.)
-- Older utility contracts
-- Deprecated contracts
-
----
-
-## Part 9: Action Checklist
-
-```markdown
-## Week 1: Consolidation
-- [ ] Create lossless-core repo (private)
-- [ ] Copy all 13 files we created into research/
-- [ ] Clone entropy-1.0-core repo locally
-- [ ] Copy smart contracts into entropyfi-reference/original-code/
-- [ ] Copy UI code from lobis-frontend
-- [ ] Extract contract addresses into deployments/
-- [ ] Copy governance code
-- [ ] Organize all files per structure above
-
-## Week 2: Arc Research
-- [ ] Read Arc documentation (https://docs.arc.io/)
-- [ ] Research Morpho on Arc integration
-- [ ] Identify Arc's default oracle
-- [ ] Check for Arc testnet faucets
-- [ ] Create Arc testnet accounts
-- [ ] Review Morpho documentation
-- [ ] Create decision matrix (yield, oracle, settlement)
-
-## Week 3: Analysis (Use AI Prompt)
-- [ ] Run AI prompt against consolidated repo
-- [ ] Generate IMPROVEMENTS.md
-- [ ] Generate ARC_STRATEGY.md
-- [ ] Generate ARC_TESTNET_DEPLOYMENT.md
-- [ ] Review outputs
-- [ ] Make final decisions on architecture
-
-## Week 4: Implementation Prep
-- [ ] Create Arc contract templates (based on Entropyfi)
-- [ ] Set up Arc testnet project
-- [ ] Stub out core contracts
-- [ ] Plan integration points
-- [ ] Schedule Morpho partnership discussion
-```
-
----
-
-## Summary: Your Consolidated Repo Will Have
-
-✅ **Complete Entropyfi research** (everything we recovered)  
-✅ **All original smart contracts** (as reference)  
-✅ **UI code patterns** (from lobis-frontend)  
-✅ **Contract deployment data** (all addresses)  
-✅ **Design system** (colors, components)  
-✅ **Generated improvement documents** (from AI)  
-✅ **Arc deployment plan** (step-by-step)  
-✅ **Decision rationale** (why each choice)  
-
-One source of truth for the entire project.
-
----
-
-**Ready to create the repo structure and run the AI prompt?**
+**You have everything Entropyfi left behind.** The code is in the repo. The docs are in the repo. The research is in the repo. The next step is reading it, understanding it, and building the improved version on better infrastructure at the right time.
